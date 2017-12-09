@@ -24,3 +24,6 @@ DEFAULT_PAGINATION = False
 
 # Links at the top
 PAGE_ORDER_BY='basename'
+
+# No sidebar (we don't use it)
+HIDE_SIDEBAR = True
