@@ -13,8 +13,17 @@ from pelicanconf import *
 SITEURL = 'https://robertou.com/ee206a'
 RELATIVE_URLS = False
 
-FEED_ALL_ATOM = 'feeds/all.atom.xml'
-CATEGORY_FEED_ATOM = 'feeds/%s.atom.xml'
+# Not a blog, no feeds please
+FEED_ATOM = None
+FEED_RSS = None
+FEED_ALL_ATOM = None
+FEED_ALL_RSS = None
+CATEGORY_FEED_ATOM = None
+CATEGORY_FEED_RSS = None
+AUTHOR_FEED_ATOM = None
+AUTHOR_FEED_RSS = None
+TAG_FEED_ATOM = None
+TAG_FEED_RSS = None
 
 DELETE_OUTPUT_DIRECTORY = True
 
