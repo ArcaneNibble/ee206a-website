@@ -34,4 +34,5 @@ below, our LQR control works and lean and steer angle stabilize to 0.
 
 ##Deployment Result
 However, our deployment result does not work perfectly, but the bike does tries to balance itself.
-A short video clip can be found [here](https://youtu.be/BEyYEvRrz-Q).
+
+<iframe width="800" height="600" src="https://www.youtube.com/embed/BEyYEvRrz-Q"></iframe>
