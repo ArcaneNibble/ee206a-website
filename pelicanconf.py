@@ -8,6 +8,8 @@ SITEURL = ''
 
 THEME = 'themes/pelican-bootstrap3'
 
+PLUGINS = ["render_math"]
+
 PATH = 'content'
 STATIC_PATHS = ['static']
 

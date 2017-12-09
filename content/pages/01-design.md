@@ -56,7 +56,7 @@ Our controller design is based on a linearized bike model described in the
 paper "Linearized dynamics equations for the balance and steer of a bicycle: a
 benchmark and review" by Meijaard et al. This model is linearized around the
 steady state with the bike straight up and moving forward at a constant velocity
-‘v’. This model has two major assumptions: that the contact between
+$v$. This model has two major assumptions: that the contact between
 the wheels and the ground is an ideal "knife-edge rolling point contact," and
 that there is negligible friction on the steering axis. This model divides the
 bike into four rigid parts: rear wheel (R frame), rear frame (B frame), front
@@ -72,11 +72,14 @@ parts as shown in the table below.
 
 According to the paper, the linearized equation of bike motion can be summarized as follow:
 
-![Bike model equation]({filename}/static/Design_fig4.png)
+$$M\begin{bmatrix}\ddot{\theta}\\\ddot{\delta}\end{bmatrix} + vC_1\begin
+{bmatrix}\dot{\theta}\\\dot{\delta}\end{bmatrix} + [gK_0 + v^2K_2]\begin
+{bmatrix}\theta\\\delta\end{bmatrix} = \begin{bmatrix}T_\theta\\T_\delta\end
+{bmatrix}$$
 
-Where θ is the lean angle and δ is the steer angle, and M, C1, K0, K2 are
-constant matrixes and can be calculated using the 25 bike parameters as shown in
-Appendix A of the paper.
+Where $\theta$ is the lean angle and $\delta$ is the steer angle, and $M$,
+$C_1$, $K_0$, $K_2$ are constant matrices and can be calculated using the 25
+bike parameters as shown in Appendix A of the paper.
 
 For the design, we have chosen to use a linearized dynamics model because linear
 models are usually simpler to understand and easier to compute with. Many
@@ -90,19 +93,24 @@ We use the standard technique to convert the equation to a first order state
 space model. We choose our state "x" to be the lean/steer angle and their
 derivatives and construct a model as follow:
 
-![Bike state space equation]({filename}/static/Design_fig5.png)
+$$x=\begin{bmatrix}\theta\\\delta\\\dot{\theta}\\\dot{\delta}\end{bmatrix} \quad
+\dot{x}=\begin{bmatrix}\theta\\\delta\\\ddot{\theta}\\\ddot{\delta}\end{bmatrix} \quad
+\dot{x}=Ax+Bu$$
 
 Where "u" is the input we are applying on steering using the steering motor.
 Since there is no external torque applied on lean angle axis and the external
 torque on steer angle is determined by our input. We can calculate the matrix
 A and B using the second order linearized equation:
 
-![Bike AB equation]({filename}/static/Design_fig6.png)
+$$A = \begin{bmatrix}0_{2x2} & I_{2x2} \\ -M^{-1}K & -M^{-1}C\end{bmatrix} \quad
+B = \begin{bmatrix}0_{2x2} \\ -M^{-1}\begin{bmatrix}0 \\ 1\end{bmatrix}\end{bmatrix}$$
 
 Next, since the control on a microcontroller is in discrete time, we convert
 our state model to discrete time:
 
-![Bike discrete time equation]({filename}/static/Design_fig7.png)
+$$A_d = e^{A\Delta t} \quad
+B_d = \int_0^{\Delta t} e^{A\tau}B d\tau \quad
+x[n+1] = A_d x[n] + B_d u[n]$$
 
 XXX FIXME The sampling rate and operating rate depend on the kind of sensors and
 microcontroller we choose to use in order to meet criteria (c).
@@ -118,5 +126,5 @@ It is a closed loop proportional feedback system and it fits our state based mod
 
 The estimator will calculate the optimal K which minimizes the cost function:
 
-![LQR equation]({filename}/static/Design_fig10.png)
-![LQR equation]({filename}/static/Design_fig11.png)
+$$J = \sum_{k=0}^{\infty} (x_k^TQx_k + u_k^TRu_k) \quad
+u_k = -Kx_k$$
