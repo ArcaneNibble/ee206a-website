@@ -47,7 +47,7 @@ that the method of actuating the fork on the model EV3 bike does not work very
 well. The friction introduced by adding a motor to the fork significantly
 affects the behavior of the bike. Adding a motor in this way is simple, but it
 will need to be improved on the "real" bike. This will be described in more
-detail in the "results" section.
+detail in the "conclusions" section.
 
 ![System block diagram]({filename}/static/Design_fig1.png)
 
@@ -79,7 +79,8 @@ $$M\begin{bmatrix}\ddot{\theta}\\\ddot{\delta}\end{bmatrix} + vC_1\begin
 
 Where $\theta$ is the lean angle and $\delta$ is the steer angle, and $M$,
 $C_1$, $K_0$, $K_2$ are constant matrices and can be calculated using the 25
-bike parameters as shown in Appendix A of the paper.
+bike parameters as shown in Appendix A of the paper. $T_\theta$ and $T_\delta$
+are the external torques applied in the lean and steer directions.
 
 For the design, we have chosen to use a linearized dynamics model because linear
 models are usually simpler to understand and easier to compute with. Many
@@ -90,8 +91,8 @@ the dynamics of the bike anymore.
 
 ###State Space Model
 We use the standard technique to convert the equation to a first order state
-space model. We choose our state "x" to be the lean/steer angle and their
-derivatives and construct a model as follow:
+space model. We choose our state $x$ to be the lean/steer angle and their
+first derivatives and construct a model as follow:
 
 $$x=\begin{bmatrix}\theta\\\delta\\\dot{\theta}\\\dot{\delta}\end{bmatrix} \quad
 \dot{x}=\begin{bmatrix}\theta\\\delta\\\ddot{\theta}\\\ddot{\delta}\end{bmatrix} \quad
@@ -115,11 +116,12 @@ x[n+1] = A_d x[n] + B_d u[n]$$
 Ideally, the sample rate of the system would be chosen to be fast enough so that
 the system can respond to all of the dynamics that may exist in the physical
 system. However, for our project, we chose to write the software using
-Linux and Python. This limited our maximum achievable sample rate.
+Linux and Python. This limited our maximum achievable sample rate. We have not
+thoroughly studied what affect this limitation had on our overall performance.
 
 ###Linear Quadratic Regulator (LQR) Control
-For this project, we chose to use LQR control. The basic block diagram of a
-system with LQR control is shown below.
+For this project, we chose to use LQR control to design the feedback control
+strategy. The basic block diagram of a system with LQR control is shown below.
 
 ![LQR diagram]({filename}/static/Design_fig8.png)
 

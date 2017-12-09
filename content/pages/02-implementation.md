@@ -10,17 +10,22 @@ EV3 "large" motor which work as the same as the hub motor of a normal E-bike. We
 have a EV3 controller brick as the main processor and an EV3 "medium" motor to
 actuate the steering. We removed the sonar sensor because we did not plan to
 use it in our design. We also added a non-EV3 MEMS IMU, the MPU9250 from
-Invensense, to sense the lean angle of the bike model. The hardware design is
-shown below.
+InvenSense (now TDK), to sense the lean angle of the bike model. The hardware
+design is shown below.
 
 ![Bike photo]({filename}/static/Implementation_fig1.png)
 
 ##MPU2950
-We use an Invensense MPU9250 9 Degree of Freedom (3-axis accelerometer, 3-axis
+We use an InvenSense MPU9250 9 Degree of Freedom (3-axis accelerometer, 3-axis
 gyroscope, 3-axis magnetometer) IMU to measure the lean angle and its
 derivative. This is labeled as the "New non-EV3 gyro" in the photo above. The
-reason we added a new sensor is because the sensor in the existing design was a
-single-axis gyro sensor. That sensor can only measure the rate of rotation
+datasheet for this part can be found
+[here](https://www.invensense.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf)
+and the register map can be found
+[here](http://www.invensense.com/wp-content/uploads/2017/11/RM-MPU-9250A-00-v1.6.pdf).
+
+The reason we added a new sensor is because the sensor in the existing design
+was a single-axis gyro sensor. That sensor can only measure the rate of rotation
 around a single axis. Attempting to integrate this rate of rotation to calculate
 an angle is prone to drift over time. However, the additional accelerometer and
 magnetometer sensors in a 9DoF IMU allow for algorithms to correct for this
@@ -32,6 +37,10 @@ sensors. The MPU9250 is thus easily connected to the EV3 controller brick using
 the wiring diagram below.
 
 ![MPU9250 photo]({filename}/static/Implementation_fig2.png)
+
+This connection was physically made by cutting a spare LEGO EV3 cable in half
+and soldering it to pin headers. The MPU9250 board is a generic board that can
+be found [on Amazon](https://www.amazon.com/dp/B01I1J0Z7Y).
 
 With this 9DoF sensor, we can easily get the derivative of the lean angle from
 the gyroscope measurement on the x-axis. In this sense, the new sensor behaves
@@ -79,7 +88,8 @@ properties of the model. We first plot out the eigenvalues of the
 uncontrolled system. Then, we check the controllability of our system to make
 sure it is controllable. Finally, we run software simulation based on the
 second order linearized model we used in the design part to show that the design
-can actually work in theory.
+can actually work in theory. More details of the simulation can be found in the
+"results" section.
 
 ##Implementation in Software
 1. Calculate the $M$, $C_1$, $K_0$, $K_2$ matrices based on the parameters and
@@ -87,8 +97,9 @@ can actually work in theory.
 2. Calculate the $A$ and $B$ matrices and based on our parts, pick a sample rate
    (=20Hz). Using the sample rate, convert the matrices to discrete time $Ad$
    and $Bd$.
-3. Using the weighting matrices $Q$ and $R$, and discrete time LQR algorithm to
-   calculate the optimal proportional factor $K$.
+3. Using the weighting matrices $Q$ and $R$, and discrete-time
+   infinite-horizon LQR algorithm to calculate the optimal proportional
+   factor $K$.
 4. We define the state of the system as we stated in the design part. The four
    state variables can be observed by:
     * Lean angle -- applying Magwick algorithm to the IMU values
