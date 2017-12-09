@@ -9,6 +9,7 @@ SITEURL = ''
 THEME = 'themes/pelican-bootstrap3'
 
 PATH = 'content'
+STATIC_PATHS = ['static']
 
 TIMEZONE = 'UTC'
 
