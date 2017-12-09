@@ -139,3 +139,13 @@ The figure below shows one set of weights we choose for our system:
 For this project, we chose to use LQR control because it is a commonly-used
 technique. Some alternatives that can be used instead include pole placement
 techniques. LQR was chosen because we were most familiar with that technique.
+
+###Motor model
+For our project, we copied the same motor model from the project that we
+referenced. That model models the torque of the motor as
+
+$$T_\delta = ku - \beta \dot{\delta}$$
+
+In other words, the torque of the motor is directly proportional to the duty
+cycle $u$ minus some amount of damping. The model also has a motor inertia term
+that is combined into the $M$ matrix.
