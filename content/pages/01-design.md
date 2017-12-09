@@ -1,33 +1,72 @@
 Title: Design
 Date: 2017-12-08
 
-##Design Criteria
+##Design Criteria and Desired Functionality
 
-* The system should be an add-on system to a normal E-bike. It should not change
-  the physical structure of a E-bike and should not distinctly affect human’s
-  control when a human rider is on the bike.
-* The sensors and actuators should not significantly increase the power
-  consumption of the E-bike.
-* The sensing and actuating should operate fast enough for the bike to balance
-  itself.
+The goal for the MEng capstone project is to build a system that:
+
+* Is an add-on system that can be easily retrofitted to a normal E-bike. It
+  should not change the physical structure of a E-bike and should not affect a
+  human's ability to control the bike.
+* Does not significantly increase the power consumption of the E-bike.
+* Successfully stabilizes the bike.
+
+In the context of EE206A, the goal was to prototype control algorithms for such
+a bike. Therefore, we wanted to build a model of a bike with a controller that
+could:
+
+* Stabilize a bike while traveling at a "high" speed
+* Stabilize a bike while traveling at near-zero speed
+* Make the bike slowly follow a line
  
-##Desired functionality
-The desired goal is to balance the E-bike when no human rider is on it while
-moving at a relatively low speed(depends on the size of the bike)
- 
-##Design
-###System overview
-We add an IMU to sense the lean angle and its velocity, a microcontroller to read the sensor values and to command the actuators, a small motor to actuate the fork of the bike. The small motor can also be used to sense the steer angle and its velocity. Since the E-bikes already have a hub motor to actuate forward moving, we can connect the hub motor to our microcontroller to control the forward speed of the bike.The overview of the system is shown in Figure 1.
-By choosing this kind of design, criteria (a)&(b) can be met: the system can be easily added to an existing E-bike, we can disable the control when human rider is on the bike, and the added parts does not significantly increase the power consumption. However, since we add a motor on the steering fork, rider’s control to the handle bar will be minorly affected.
+##Design Details
+###System Overview
+Due to time constraints, we are not yet able to build a "real" E-bike. For
+this class, we have built a model bike using LEGO EV3 parts. Our hardware
+platform is heavily based on an
+[existing design](https://www.mathworks.com/matlabcentral/fileexchange/58231-lego-mindstorms-ev3-bike-project)
+built by students at the University of Florence (however, the software platform
+is completely different and described in the "implementation" section). This
+model still allows us to test control algorithms, and it should still be
+possible to achieve the desired features.
+
+We built a fairly-typical digital feedback control system centered around a
+CPU connected to sensors and actuators. We use a MEMS IMU to sense the lean
+angle of the bike as well as its derivative. Because our model is built using
+the LEGO EV3 system, we use a EV3 "medium" motor to actuate the fork of the
+bike. This motor can also be used to sense the steer angle and its derivative.
+We use an EV3 "large" motor to control the rear wheel on our model
+bike. On a real E-bike, this is instead done with a hub motor. A block diagram
+of the system is shown below.
+
+This design (both the EV3 model and the modifications needed for future "real"
+E-bike that will be built for the MEng project) uses cheap and
+commonly-available parts, and most of the design criteria are easily met.
+However, when we were working on building the control algorithms, we discovered
+that the method of actuating the fork on the model EV3 bike does not work very
+well. The friction introduced by adding a motor to the fork significantly
+affects the behavior of the bike. Adding a motor in this way is simple, but it
+will need to be improved on the "real" bike. This will be described in more
+detail in the "results" section.
 
 ![System block diagram]({filename}/static/Design_fig1.png)
- 
+
 ###Linearized Bike Model
-Our design is based on a linearized bike model characterized in the paper: “Linearized dynamics equations for the balance and steer of a bicycle: a benchmark and review”[1]. This model linearized the bike when it is straight up and moving forward at a constant velocity ‘v’. Two assumption this model makes are: knife-edge rolling point contact and negligible friction on steering axis. This model divides the bike into four rigid parts: rear wheel(R frame), rear frame(B frame), front frame(H frame), front wheel(F frame) as shown in Figure 2.
+Our controller design is based on a linearized bike model described in the
+paper "Linearized dynamics equations for the balance and steer of a bicycle: a
+benchmark and review" by Meijaard et al. This model is linearized around the
+steady state with the bike straight up and moving forward at a constant velocity
+‘v’. This model has two major assumptions: that the contact between
+the wheels and the ground is an ideal "knife-edge rolling point contact," and
+that there is negligible friction on the steering axis. This model divides the
+bike into four rigid parts: rear wheel (R frame), rear frame (B frame), front
+frame (H frame), and front wheel (F frame) as shown in this diagram taken from
+the paper:
 
 ![Bike model]({filename}/static/Design_fig2.png)
 
-The bike then can be characterized using the physical parameters of four parts shown in Table 1[1]. one unusual parameters is the trail of the bike which means the distance between the front wheel/ground contact point to the point where the axis of front fork and ground intersect.
+The bike then can be characterized using the physical parameters of the four
+parts as shown in the table below.
 
 ![Bike parameter table]({filename}/static/Design_fig3.png)
 
@@ -35,23 +74,38 @@ According to the paper, the linearized equation of bike motion can be summarized
 
 ![Bike model equation]({filename}/static/Design_fig4.png)
 
-Where θ is the lean angle and δ is the steer angle, M is the symmetric mass matrix, C1 captures gyroscopic torques due to lean and steer rate and inertial reaction due to steer rate, K0 and K2 define the stiffness matrix K. M, C1, K0, K2 are constant matrixes and can be calculated using the 25 bike parameters as shown in Appendix A of the paper. (The paper can be found in additional materials)
-However, by using this model, we have to place the bike straight up every time we want to apply our control system. Also, if the lean and the steer angle is too big, the linearized equation does not describe the dynamics of the bike anymore. In real life scenario, we need to design a special stick stand to keep the bike straight up when it is at stationary. 
+Where θ is the lean angle and δ is the steer angle, and M, C1, K0, K2 are
+constant matrixes and can be calculated using the 25 bike parameters as shown in
+Appendix A of the paper.
 
-###State Based Model
-We use standard technique to convert the equation to a first order state based model. We choose our state “x” to be the lean/steer angle and their derivatives and construct a model as follow:
+For the design, we have chosen to use a linearized dynamics model because linear
+models are usually simpler to understand and easier to compute with. Many
+real-life control systems also operate with linearized models. However, the
+trade-off is that this linear model is only linearized around one point. If the
+lean and the steer angle is too big, the linearized equation does not describe
+the dynamics of the bike anymore.
+
+###State Space Model
+We use the standard technique to convert the equation to a first order state
+space model. We choose our state "x" to be the lean/steer angle and their
+derivatives and construct a model as follow:
 
 ![Bike state space equation]({filename}/static/Design_fig5.png)
 
-Where “u” is the input we are applying on steering using the steering motor. Since there is no external torque applied on lean angle axis and the external torque on steer angle is determined by our input. We can calculate the matrix A and B using the second order linearized equation:
+Where "u" is the input we are applying on steering using the steering motor.
+Since there is no external torque applied on lean angle axis and the external
+torque on steer angle is determined by our input. We can calculate the matrix
+A and B using the second order linearized equation:
 
 ![Bike AB equation]({filename}/static/Design_fig6.png)
 
-Next, since the control on a microcontroller is in discrete time, we convert our state model to discrete time:
+Next, since the control on a microcontroller is in discrete time, we convert
+our state model to discrete time:
 
 ![Bike discrete time equation]({filename}/static/Design_fig7.png)
 
-The sampling rate and operating rate depend on the kind of sensors and microcontroller we choose to use in order to meet criteria (c).
+XXX FIXME The sampling rate and operating rate depend on the kind of sensors and
+microcontroller we choose to use in order to meet criteria (c).
 
 ###Linear Quadratic Regulator(LQR) Control
 The basic block diagram of LQR control is shown in Figure 3.
@@ -62,7 +116,7 @@ It is a closed loop proportional feedback system and it fits our state based mod
 
 ![LQR code]({filename}/static/Design_fig9.png)
 
-The estimator will calculate the optimal K which minizes the cost function:
+The estimator will calculate the optimal K which minimizes the cost function:
 
 ![LQR equation]({filename}/static/Design_fig10.png)
 ![LQR equation]({filename}/static/Design_fig11.png)
