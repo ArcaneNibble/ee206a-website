@@ -20,3 +20,14 @@ DEFAULT_PAGINATION = False
 
 # Uncomment following line if you want document-relative URLs when developing
 #RELATIVE_URLS = True
+
+# Links at the top
+DISPLAY_PAGES_ON_MENU = False
+MENUITEMS = (
+    ('Background and motivation', '/pages/background-and-motivation.html'),
+    ('Design', '/pages/design.html'),
+    ('Implementation', '/pages/implementation.html'),
+    ('Results', '/pages/results.html'),
+    ('Conclusions', '/pages/conclusions.html'),
+    ('Team', '/pages/team.html'),
+)
