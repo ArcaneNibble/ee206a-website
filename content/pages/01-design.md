@@ -112,19 +112,28 @@ $$A_d = e^{A\Delta t} \quad
 B_d = \int_0^{\Delta t} e^{A\tau}B d\tau \quad
 x[n+1] = A_d x[n] + B_d u[n]$$
 
-XXX FIXME The sampling rate and operating rate depend on the kind of sensors and
-microcontroller we choose to use in order to meet criteria (c).
+Ideally, the sample rate of the system would be chosen to be fast enough so that
+the system can respond to all of the dynamics that may exist in the physical
+system. However, for our project, we chose to write the software using
+Linux and Python. This limited our maximum achievable sample rate.
 
-###Linear Quadratic Regulator(LQR) Control
-The basic block diagram of LQR control is shown in Figure 3.
+###Linear Quadratic Regulator (LQR) Control
+For this project, we chose to use LQR control. The basic block diagram of a
+system with LQR control is shown below.
 
 ![LQR diagram]({filename}/static/Design_fig8.png)
 
-It is a closed loop proportional feedback system and it fits our state based model. The estimator calculates the proportional constant matrix ‘K’ based on the Q and R values we choose. The value on the diagonal of Q indicates the weight of each input and the value of R indicates the weight of the input. Figure 4 shows one set of weights we choose for our system:
+LQR is a strategy for designing a state-feedback control system. It results
+in a control strategy of the form $$u_k = -Kx_k$$ The algorithm
+calculates an ideal proportional constant matrix $K$ that minimizes the
+cost function $$J = \sum_{k=0}^{\infty} (x_k^TQx_k + u_k^TRu_k)$$ based on the
+$Q$ and $R$ design parameters we choose. As is common, we choose $Q$ to be a
+diagonal matrix. The value on the diagonal of $Q$ indicates the weight
+of each input and the value of $R$ indicates the weight of the control output.
+The figure below shows one set of weights we choose for our system:
 
 ![LQR code]({filename}/static/Design_fig9.png)
 
-The estimator will calculate the optimal K which minimizes the cost function:
-
-$$J = \sum_{k=0}^{\infty} (x_k^TQx_k + u_k^TRu_k) \quad
-u_k = -Kx_k$$
+For this project, we chose to use LQR control because it is a commonly-used
+technique. Some alternatives that can be used instead include pole placement
+techniques. LQR was chosen because we were most familiar with that technique.
